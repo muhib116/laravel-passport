@@ -14,6 +14,23 @@ use Exception;
 
 class AuthController extends Controller
 {
+    public function index()
+    {
+        $user = User::all();
+        if($user)
+        {
+            return response()->json([
+                'Message' => 'User\'s data',
+                'Data' => $user
+            ]);
+        }
+
+        return response()->json([
+            'Message' => 'Users not found!'
+        ]);
+    }
+
+
     public function login(Request $request)
     {
         $validation = Validator($request->all(), [
@@ -26,7 +43,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'Message' => 'Validation Error!',
-                'Error'   => $validation->error()
+                'Error'   => $validation->errors()
             ], 422);
         }
 
@@ -84,5 +101,33 @@ class AuthController extends Controller
                 'message' => $e->getMessage()
             ], $e->getCode());
         }
+    }
+
+    public function show($id)
+    {
+        $user = User::find($id);
+
+        if($user)
+        {
+            return response()->json([
+                'Message' => 'User data',
+                'Data' => [
+                    'name' => $user->name,
+                    'email' => $user->email
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'Message' => 'User not found!'
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        auth()->user()->token()->revoke();
+        return response()->json([
+            'message' => 'Successfully Logout!'
+        ]);
     }
 }
